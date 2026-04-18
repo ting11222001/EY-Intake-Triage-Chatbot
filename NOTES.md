@@ -102,3 +102,24 @@ lines: ['CATEGORY: billing', 'CONFIDENCE: 95', 'REASON: The client explicitly st
 ```
 
 The `lines` print statement was used for debugging and can be removed.
+
+The response from here:
+```
+response = client.messages.create(
+        model="claude-haiku-4-5",                           # just simple classification for this example, so we can use a smaller model
+        max_tokens=200,                                     # stop after 200 tokens at most
+        messages=[{"role": "user", "content": prompt}]
+    )
+```
+
+looked like this:
+```
+ Message(id='msg_01WSBbX73t5KqtyhCjcdvM2e', container=None, content=[TextBlock(citations=None, text='CATEGORY: account access\nCONFIDENCE: 95\nREASON: The client explicitly states they cannot log in to their account, which is a clear account access issue.', type='text')], model='claude-haiku-4-5-20251001', role='assistant', stop_details=None, stop_reason='end_turn', stop_sequence=None, type='message', usage=Usage(cache_creation=CacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo='not_available', input_tokens=181, output_tokens=38, server_tool_use=None, service_tier='standard'))
+```
+
+And `result = response.content[0].text` looked like this:
+```
+Bot (internal): CATEGORY: account access
+CONFIDENCE: 95
+REASON: The client explicitly states they cannot log into their account, which is a clear account access issue.
+```

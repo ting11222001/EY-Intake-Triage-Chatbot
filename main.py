@@ -52,6 +52,8 @@ def classify(conversation):
         messages=[{"role": "user", "content": prompt}]
     )
 
+    # print(f"Bot: Here's what I found: {response}")
+
     result = response.content[0].text
     # print("Bot (internal):", result)
     route(result)
