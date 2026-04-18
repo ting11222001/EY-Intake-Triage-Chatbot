@@ -47,7 +47,7 @@ def classify(conversation):
     
     response = client.messages.create(
         model="claude-haiku-4-5",                           # just simple classification for this example, so we can use a smaller model
-        max_tokens=200,                                     # stop after 200 tokens at most
+        max_tokens=200,                                     # stop after 200 tokens at most i.e. keep the reply short
         messages=[{"role": "user", "content": prompt}]
     )
 
