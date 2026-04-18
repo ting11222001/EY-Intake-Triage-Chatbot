@@ -1,9 +1,8 @@
 from anthropic import Anthropic
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))      # Create a connection to the Anthropic service
+client = Anthropic()      # Create a connection to the Anthropic service
 
 QUESTIONS = [
     "What is your name?",
