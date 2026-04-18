@@ -1,6 +1,8 @@
-# Test Cases and Results
+# Notes
 
-## Test 1: Billing, high confidence
+## Test Cases and Results
+
+### Test 1: Billing, high confidence
 
 **Input**
 ```
@@ -18,7 +20,7 @@ Bot: You will be routed to our billing team.
 
 
 
-## Test 2: Account access
+### Test 2: Account access
 
 **Input**
 ```
@@ -36,7 +38,7 @@ Bot: You will be routed to our account access team.
 
 
 
-## Test 3: Vague problem, human fallback
+### Test 3: Vague problem, human fallback
 
 **Input**
 ```
@@ -55,7 +57,7 @@ Bot: A human agent will review your case and contact you shortly.
 
 
 
-## Test 4: Technical issue
+### Test 4: Technical issue
 
 **Input**
 ```
@@ -73,7 +75,7 @@ Bot: You will be routed to our technical support team.
 
 
 
-## Test 5: General enquiry
+### Test 5: General enquiry
 
 **Input**
 ```
@@ -89,7 +91,7 @@ Urgent?  → medium
 Bot: You will be routed to our general enquiry team.
 ```
 
-## Debug note
+### Debug note
 
 Early test run showed the raw parsed response before routing logic was confirmed:
 
@@ -123,3 +125,10 @@ Bot (internal): CATEGORY: account access
 CONFIDENCE: 95
 REASON: The client explicitly states they cannot log into their account, which is a clear account access issue.
 ```
+
+
+### Billing
+
+Anthropic API needs separate credit balance. Once topped up, create a new API key to make sure the API key and the billing balance are in sync.
+
+Check the credit balance here: https://platform.claude.com/settings/billing
