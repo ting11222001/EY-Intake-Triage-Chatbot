@@ -556,3 +556,17 @@ Links             : {}
 ParsedHtml        : System.__ComObject
 RawContentLength  : 135
 ```
+
+### Streamlit
+
+Streamlit Community Cloud (free, easiest)
+- Push code to GitHub
+- Go to https://share.streamlit.io
+- Connect repo and deploy `app.py`
+- Get a free public URL like https://yourname-intake-chatbot.streamlit.app
+
+Settings > Secrets:
+```
+ANTHROPIC_API_KEY="..."
+AWS_LAMBDA_URL="https://<id>.ap-southeast-2.amazonaws.com"
+```

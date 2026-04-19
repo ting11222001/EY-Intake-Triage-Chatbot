@@ -1,6 +1,15 @@
 import streamlit as st
 import requests
-from config import API_URL
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Use Streamlit secrets if available, otherwise fall back to config.py
+if "AWS_LAMBDA_URL" in st.secrets:
+    API_URL = st.secrets["AWS_LAMBDA_URL"]
+else:
+    from config import API_URL
 
 st.title("Intake Triage Chatbot")
 st.caption("Built as a portfolio project demonstrating Responsible AI principles.")
