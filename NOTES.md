@@ -342,3 +342,217 @@ Streamlit will open your browser automatically at http://localhost:8501.
 ## Deployment
 
 URLs are defined in `config.py`.
+
+To switch, just change ENV in your .env file:
+```
+ENV=local
+```
+or
+```
+ENV=aws
+```
+
+Double check:
+```
+aws --version
+sam --version
+aws configure list
+```
+
+In `requirements.txt`:
+```
+anthropic
+fastapi
+mangum        # mangum a small library that makes FastAPI work inside Lambda. Lambda
+python-dotenv
+```
+
+In `api.py`:
+```
+from mangum import Mangum
+handler = Mangum(app)
+```
+
+Also, install:
+```
+pip install mangum
+```
+
+When you run `uvicorn api:app` locally, `uvicorn` is the thing that receives web requests and passes them to your FastAPI app.
+But on Lambda, there is no `uvicorn`. Lambda receives a request in its own format and looks for a function called handler to call.
+`Mangum` sits in between. It receives the Lambda-format request, translates it into a format FastAPI understands, and passes it through.
+So:
+
+- Locally: `uvicorn` talks to app
+- On Lambda: handler receives the request, `Mangum` translates it, then passes it to app
+
+The `template.yaml` line Handler: `api.handler` tells Lambda exactly where to find it, meaning look in `api.py` for a thing called `handler`.
+
+
+### AWS CLI
+
+Store my API key in AWS SSM:
+```
+aws ssm put-parameter --name "/intake-chatbot/anthropic-api-key" --value "sk-ant-api03-xxxxxxxxxxxx" --type SecureString
+```
+
+Now build and deploy:
+```
+cd <project-root-path>
+sam build
+sam deploy --guided
+```
+
+For the guided prompts, use these answers:
+```
+Stack name: intake-chatbot
+Region: ap-southeast-2
+Confirm changes: Y
+Allow IAM role creation: Y
+Save arguments to config file: Y
+```
+
+At the end you will see a URL that looks like:
+https://abc123.execute-api.ap-southeast-2.amazonaws.com
+
+Copy that URL and paste it into `config.py` under "aws".
+
+### PowerShell error if I run sam build directly
+
+In powershell, before `sam build`, run these first.
+
+First command:
+```
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+```
+
+Windows blocks PowerShell scripts by default for security. This command temporarily allows scripts to run, but only for the current PowerShell window. It does not change your system settings permanently.
+
+Second command:
+```
+.\venv\Scripts\Activate.ps1
+```
+This activates your Python virtual environment. After this runs, your terminal uses the Python and packages inside the venv folder, not your system Python.
+
+Then run `sam build` shows this:
+```
+Building codeuri: C:\Users\Li-Ting\Documents\Projects\intake-chatbot runtime: python3.12 architecture: x86_64 functions:
+IntakeChatbotFunction                                                                                                   
+ Running PythonPipBuilder:ResolveDependencies                                                                           
+ Running PythonPipBuilder:CopySource                                                                                    
+
+Build Succeeded
+
+Built Artifacts  : .aws-sam\build
+Built Template   : .aws-sam\build\template.yaml
+
+Commands you can use next
+=========================
+[*] Validate SAM template: sam validate
+[*] Invoke Function: sam local invoke
+[*] Test Function in the Cloud: sam sync --stack-name {{stack-name}} --watch
+[*] Deploy: sam deploy --guided
+```
+
+Then run `sam deploy --guided`.
+
+Here are my answers to the prompt:
+```
+  Stack Name [sam-app]: intake-chatbot
+  AWS Region [ap-southeast-2]: ap-southeast-2
+  Confirm changes before deploy [y/N]: y
+  Allow SAM CLI IAM role creation [Y/n]: y
+  Disable rollback [y/N]: n
+  IntakeChatbotFunction has no authentication. Is this okay? [y/N]: y
+  Save arguments to configuration file [Y/n]:       # the rest I just pressed Enter to accept the defaults
+  SAM configuration file [samconfig.toml]: 
+  SAM configuration environment [default]: 
+```
+
+At the end I should see a URL that looks like:
+```
+https://abc123.execute-api.ap-southeast-2.amazonaws.com
+```
+
+Copy that URL and paste it into `config.py` under "aws".
+
+
+### Check the shape of `/intake-chatbot/anthropic-api-key` parameter in AWS SSM 
+
+To check the API key I stored under the name `/intake-chatbot/anthropic-api-key` in AWS SSM, run this:
+```
+aws ssm get-parameter --name "/intake-chatbot/anthropic-api-key" --with-decryption
+```
+
+`--with-decryption`: decrypt the value before returning it as the key was stored as SecureString
+
+It will print something like:
+```
+{
+    "Parameter": {
+        "Name": "/intake-chatbot/anthropic-api-key",
+        "Type": "SecureString",
+        "Value": "sk-ant-api03-xxxx",
+        "Version": 1,
+        ...
+    }
+}
+```
+
+which is what `response` from `ssm.get_parameter()` in `api.py` would look like.
+
+### Get the API Gateway URL after deploy
+
+Once it shows:
+```
+Successfully created/updated stack - intake-chatbot in ap-southeast-2
+```
+
+Do this to find the public URL of API Gateway:
+```
+sam list endpoints --stack-name intake-chatbot --region ap-southeast-2
+```
+
+Which is this:
+```
+https://<id>.ap-southeast-2.amazonaws.com/$default
+```
+
+Save it in the `.env` file as `AWS_LAMBDA_URL`.
+
+Run this to confirm Lambda is working:
+```
+curl https://<id>.ap-southeast-2.amazonaws.com/questions
+```
+
+It will print:
+```
+Security Warning: Script Execution Risk                                                                                                                                      
+Invoke-WebRequest parses the content of the web page. Script code in the web page might be run when the page is parsed.
+      RECOMMENDED ACTION:
+      Use the -UseBasicParsing switch to avoid script code execution.
+
+      Do you want to continue?
+    
+[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "N"): y
+
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"questions":["What is your name?","Can you describe the problem you are having?","How urgent is this for you? (low / medium / high)"]}
+RawContent        : HTTP/1.1 200 OK
+                    Connection: keep-alive
+                    Apigw-Requestid: cESC8gznSwMEMqA=
+                    Content-Length: 135
+                    Content-Type: application/json
+                    Date: Sun, 19 Apr 2026 12:26:59 GMT
+                    
+                    {"questions":["What is your name...
+Forms             : {}
+Headers           : {[Connection, keep-alive], [Apigw-Requestid, cESC8gznSwMEMqA=], [Content-Length, 135], [Content-Type, application/json]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 135
+```

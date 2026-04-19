@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31   # process this file as a SAM template
+
+Globals:
+  Function:
+    Timeout: 30                         # Set a default timeout for all Lambda functions e.g. 30 seconds
+    Environment:
+        Variables:
+          ENV: aws
+
+Resources:
+  IntakeChatbotFunction:
+    Type: AWS::Serverless::Function     # tells SAM this is a Lambda function
+    Properties:
+      CodeUri: .                        # use the current directory as the source code. SAM will zip and upload it.
+      Handler: api.handler              # the entry point
+      Runtime: python3.12               # the Lambda execution environment 
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: intake-chatbot/anthropic-api-key   # The API key will come from SSM at runtime instead of being hardcoded in the code
+      Events:                           # Creates an API Gateway that triggers the Lambda
+        Api:
+          Type: HttpApi                 # Use HttpApi for cheaper and lower latency but simpler API Gateway than Api. Stage name: HttpApi defaults to $default. Api defaults to Prod.
+          Properties:
+            Path: /{proxy+}             # all routes go to one Lambda handler
+            Method: ANY                 # all HTTP methods (GET, POST, etc.) are accepted

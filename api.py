@@ -1,10 +1,27 @@
+import os
+import boto3
 from fastapi import FastAPI
 from pydantic import BaseModel
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
 load_dotenv()
-client = Anthropic()      # Create a connection to the Anthropic service
+
+def get_api_key():
+    # For local development, store the API key in an environment variable or .env file
+    local_key = os.environ.get('ANTHROPIC_API_KEY')
+    if local_key:
+        return local_key
+    
+    # For Lambda, fetch the API key from AWS SSM Parameter Store instead of environment variables, for better security
+    ssm = boto3.client('ssm', region_name='ap-southeast-2')  # Creates a connection to the AWS SSM service in the Sydney region
+    response = ssm.get_parameter(
+        Name='/intake-chatbot/anthropic-api-key',            
+        WithDecryption=True                                  # WithDecryption=True is required because it was stored as SecureString
+    )
+    return response['Parameter']['Value']
+
+client = Anthropic(api_key=get_api_key())      # Create a connection to the Anthropic service
 app = FastAPI()           # A FastAPI instance that will listen for incoming requests
 
 QUESTIONS = [
@@ -28,14 +45,14 @@ def get_questions():
 
 @app.post("/classify")
 def classify(request: ChatRequest):
-    print("Received answers: ", request.answers)
+    # print("Received answers: ", request.answers)        # ['Tiff', "didn't get the invoice", 'high']
     
     answers = []
     for i in range(len(QUESTIONS)):
         answers.append(f"Q: {QUESTIONS[i]}\nA: {request.answers[i]}")
 
     conversation = "\n".join(answers)
-    print("Conversation: ", conversation)
+    # print("Conversation: ", conversation)
 
     prompt = f"""
         You are a triage assistant. Based on the client answers below, do two things:
@@ -64,7 +81,7 @@ def classify(request: ChatRequest):
     )
 
     result = response.content[0].text.strip().split("\n")
-    print("Result: ", result)
+    # print("Result: ", result)                             # ['CATEGORY: billing', 'CONFIDENCE: 92', 'REASON: The client explicitly states they did not receive an invoice, which is a billing-related issue.']
 
     category = ""
     confidence = 0
@@ -90,3 +107,7 @@ def classify(request: ChatRequest):
         reason=reason,
         routed_to=routed_to
     )
+
+
+from mangum import Mangum
+handler = Mangum(app)

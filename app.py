@@ -2,9 +2,8 @@ import streamlit as st
 import requests
 from config import API_URL
 
-API_URL = API_URL
-
-st.title("EY Intake Triage Chatbot")
+st.title("Intake Triage Chatbot")
+st.caption("Built as a portfolio project demonstrating Responsible AI principles.")
 st.write("Answer a few questions and we will route you to the right team.")
 
 questions_response = requests.get(f"{API_URL}/questions")   # {'questions': ['What is your name?', 'Can you describe the problem you are having?', 'How urgent is this for you? (low / medium / high)']}
