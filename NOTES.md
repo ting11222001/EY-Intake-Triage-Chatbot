@@ -314,3 +314,31 @@ Response:
   "routed_to": "account access team"
 }
 ```
+
+## Setup Streamlit
+
+Streamlit turns a Python script into a web page. No HTML or CSS needed.
+
+Install Streamlit first:
+```
+pip install streamlit
+```
+
+Create a new file called `app.py`.
+
+Terminal 1 (runs the API):
+```
+uvicorn api:app --reload
+```
+
+Terminal 2 (runs the frontend):
+```
+streamlit run app.py
+```
+
+Streamlit will open your browser automatically at http://localhost:8501.
+
+
+## Deployment
+
+URLs are defined in `config.py`.
