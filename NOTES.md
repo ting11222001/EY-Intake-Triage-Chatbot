@@ -210,7 +210,7 @@ See the two endpoints, `GET /questions` and `POST /classify`. Click on `/classif
 **Input**
 ```json
 {
-  "answers": ["David Chen", "Our client cannot log into the EY client portal to view their deliverables", "medium"]
+  "answers": ["David Chen", "Our client cannot log into the client portal to view their deliverables", "medium"]
 }
 ```
 
@@ -219,7 +219,7 @@ See the two endpoints, `GET /questions` and `POST /classify`. Click on `/classif
 {
   "category": "account access",
   "confidence": 95,
-  "reason": "The client explicitly states they cannot log into the EY client portal, which is a clear account access issue.",
+  "reason": "The client explicitly states they cannot log into the client portal, which is a clear account access issue.",
   "routed_to": "account access team"
 }
 ```
@@ -273,7 +273,7 @@ See the two endpoints, `GET /questions` and `POST /classify`. Click on `/classif
 **Input**
 ```json
 {
-  "answers": ["James Okafor", "We want to understand what AI tools EY can offer for our supply chain project", "medium"]
+  "answers": ["James Okafor", "We want to understand what AI tools you can offer for our supply chain project", "medium"]
 }
 ```
 
