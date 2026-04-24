@@ -50,7 +50,7 @@ Bot: You will be routed to our billing team.
 **Input**
 ```
 Name     → David Chen
-Problem  → Our client cannot log into the EY client portal to view their deliverables
+Problem  → Our client cannot log into the client portal to view their deliverables
 Urgent?  → medium
 ```
 
@@ -105,7 +105,7 @@ Bot: You will be routed to our technical support team.
 **Input**
 ```
 Name     → James Okafor
-Problem  → We want to understand what AI tools EY can offer for our supply chain project
+Problem  → We want to understand what AI tools you can offer for our supply chain project
 Urgent?  → medium
 ```
 
